@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#6540ce</color>
+    <color name="background">#efefef</color>
+    <color name="colorText">#000000</color>
+    <color name="divider">#FFFFFF</color>
+    <color name="labelsColorText">#6540ce</color>
+
+    <color name="gold_star">#6540ce</color>
+    <color name="white_star">#FFFFFFFF</color>
+
+</resources>

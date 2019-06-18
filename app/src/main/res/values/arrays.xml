@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="settings_order_by_labels">
+
+        <item>@string/settings_order_by_most_popular_label_descending</item>
+
+        <item>@string/settings_order_by_top_rated_label_descending</item>
+
+        <item>@string/settings_show_favorites_label</item>
+
+
+    </string-array>
+
+    <string-array name="settings_order_by_values">
+
+        <item>@string/settings_order_by_most_popular_value_descending</item>
+
+        <item>@string/settings_order_by_top_rated_value_descending</item>
+
+        <item>@string/settings_show_favorites_value</item>
+
+    </string-array>
+
+    <string-array name="spinner_settings">
+        <item>Top Rated</item>
+        <item>Most Popular</item>
+        <item>Favorites</item>
+
+    </string-array>
+
+</resources>
