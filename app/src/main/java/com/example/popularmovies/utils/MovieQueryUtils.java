@@ -168,11 +168,13 @@ public class MovieQueryUtils {
                 // Extract the value for the key called "overview"
                 String moviePlotSynopsis = currentMovie.getString("overview");
 
+                String movieBackdropPath = currentMovie.getString("backdrop_path");
+
                 String movieId = currentMovie.getString("id");
 
                 // Create a new Movie object with the title, poster image, release date, vote average
                 // and and plot synopsis from the JSON response.
-                Movie movie = new Movie(moviePosterImage, movieTitle, movieReleaseDate, movieVoteAverage, moviePlotSynopsis, movieId);
+                Movie movie = new Movie(moviePosterImage, movieTitle, movieReleaseDate, movieVoteAverage, moviePlotSynopsis, movieBackdropPath, movieId);
 
                 // Add the new Movie to the list of movie.
                 movies.add(movie);

@@ -1,9 +1,13 @@
 package com.example.popularmovies.ui;
 
+import android.content.res.Configuration;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,10 +20,17 @@ import java.util.Objects;
 public class DetailActivity extends AppCompatActivity {
 
 
+    public static AppBarLayout mAppBarLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        Toolbar toolbar =  findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
+
 
         // Find the image and text views in the detail_activity and set them to their corresponding
         // variables
@@ -40,6 +51,15 @@ public class DetailActivity extends AppCompatActivity {
             movieTitleTextView.setText(detailsArray[0]);
         }
 
+        mAppBarLayout = findViewById(R.id.app_bar);
+        if(getSupportActionBar()!=null) {
+            getSupportActionBar().setTitle(detailsArray[0]);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        ImageView toolbarImage =  findViewById(R.id.backdrop);
+
+
         // This if statement checks if there is a poster image for the current movie. If the
         // response returns null set it to the posterimageplaceholder.png else set it to the
         // correct image provided.
@@ -48,6 +68,11 @@ public class DetailActivity extends AppCompatActivity {
         Picasso.get().load(picassoPosterImage)
                 .error(R.drawable.posterimageplaceholder)
                 .into(moviePosterImageView);
+
+        String picassoBackdropImage = "http://image.tmdb.org/t/p/w1280/" + Objects.requireNonNull(detailsArray)[5];
+        Picasso.get().load(picassoBackdropImage)
+                .error(R.drawable.posterimageplaceholder)
+                .into(toolbarImage);
 
         movieReleaseDateTextView.setText(detailsArray[2]);
         movieVoteAverageTextView.setText(detailsArray[3]);
@@ -76,6 +101,5 @@ public class DetailActivity extends AppCompatActivity {
             fab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
         }
     }
-
 
 }

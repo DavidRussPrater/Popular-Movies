@@ -90,8 +90,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 String movieReleaseDate = currentMovie.getReleaseDate();
                 String movieVoteAverage = currentMovie.getVoteAverage();
                 String moviePlotSynopsis = currentMovie.getPlotSynopsis();
+                String movieBackdropPath = currentMovie.getBackdropPath();
 
-                String[] movieDetailsArray = {movieTitle, moviePoster, movieReleaseDate, movieVoteAverage, moviePlotSynopsis};
+                String[] movieDetailsArray = {movieTitle, moviePoster, movieReleaseDate, movieVoteAverage, moviePlotSynopsis, movieBackdropPath};
 
                 // Create variable for the
                 Class destinationActivity = DetailActivity.class;

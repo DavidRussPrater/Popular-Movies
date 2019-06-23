@@ -12,6 +12,8 @@ public class Movie {
 
     private final String mPlotSynopsis;
 
+    private final String mBackdropPath;
+
     private final String mMovieId;
 
 
@@ -25,12 +27,13 @@ public class Movie {
      * @param plotSynopsis is the plot synopsis of the movies
      */
     public Movie(String posterImage, String movieTitle, String releaseDate, String voteAverage,
-                 String plotSynopsis, String movieId){
+                 String plotSynopsis, String backdropPath, String movieId){
         mPosterImage = posterImage;
         mMovieTitle = movieTitle;
         mReleaseDate = releaseDate;
         mVoteAverage = voteAverage;
         mPlotSynopsis = plotSynopsis;
+        mBackdropPath = backdropPath;
         mMovieId = movieId;
     }
 
@@ -57,6 +60,10 @@ public class Movie {
     // Returns the plot synopsis of the movie
     public String getPlotSynopsis(){
         return mPlotSynopsis;
+    }
+
+    public String getBackdropPath(){
+        return mBackdropPath;
     }
 
     public String getMovieId(){
