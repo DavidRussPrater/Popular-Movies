@@ -1,73 +1,79 @@
 package com.example.popularmovies.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Movie {
 
-    private final String mPosterImage;
-
-    private final String mMovieTitle;
-
-    private final String mReleaseDate;
-
-    private final String mVoteAverage;
-
-    private final String mPlotSynopsis;
-
-    private final String mBackdropPath;
-
-    private final String mMovieId;
-
-
     /**
-     * Constructs a new {@link Movie} object
-     *
-     * @param posterImage is the movies poster image
-     * @param movieTitle is the title of the movies
-     * @param releaseDate is the release date of the movies
-     * @param voteAverage is the average vote of the movies
-     * @param plotSynopsis is the plot synopsis of the movies
+     * Created by Gino Osahon on 13/03/2017.
      */
-    public Movie(String posterImage, String movieTitle, String releaseDate, String voteAverage,
-                 String plotSynopsis, String backdropPath, String movieId){
-        mPosterImage = posterImage;
-        mMovieTitle = movieTitle;
-        mReleaseDate = releaseDate;
-        mVoteAverage = voteAverage;
-        mPlotSynopsis = plotSynopsis;
-        mBackdropPath = backdropPath;
-        mMovieId = movieId;
+    @SerializedName("poster_path")
+    private String posterPath;
+    @SerializedName("overview")
+    private String overview;
+    @SerializedName("release_date")
+    private String releaseDate;
+    @SerializedName("id")
+    private String id;
+    @SerializedName("title")
+    private String title;
+    @SerializedName("backdrop_path")
+    private String backdropPath;
+    @SerializedName("vote_average")
+    private String voteAverage;
+
+    public Movie(String posterPath, String overview, String releaseDate, String id,
+                 String title, String backdropPath, String voteAverage) {
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.id = id;
+        this.title = title;
+        this.backdropPath = backdropPath;
+        this.voteAverage = voteAverage;
     }
 
-    // Returns the string for the movie's poster
-    public String getPosterImage(){
-        return mPosterImage;
+    public String getPosterPath() {
+        return posterPath;
     }
-
-    // Returns the title of the movies
-    public String getMovieTitle(){
-        return mMovieTitle;
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
     }
-
-    // Returns the release date fo the movies
-    public String getReleaseDate(){
-        return mReleaseDate;
+    public String getOverview() {
+        return overview;
     }
-
-    // Returns the average vote ov the movies
-    public String getVoteAverage(){
-        return mVoteAverage;
+    public void setOverview(String overview) {
+        this.overview = overview;
     }
-
-    // Returns the plot synopsis of the movie
-    public String getPlotSynopsis(){
-        return mPlotSynopsis;
+    public String getReleaseDate() {
+        return releaseDate;
     }
-
-    public String getBackdropPath(){
-        return mBackdropPath;
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
-
-    public String getMovieId(){
-        return mMovieId;
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+    public String getVoteAverage() {
+        return voteAverage;
+    }
+    public void setVoteAverage(String voteAverage) {
+        this.voteAverage = voteAverage;
     }
 
 }

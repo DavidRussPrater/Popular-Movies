@@ -1,30 +1,48 @@
 package com.example.popularmovies.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Review {
 
 
-    private final String mAuthor;
+    @SerializedName("author")
+    private String authorName;
 
-    private final String mContent;
+    @SerializedName("content")
+    private String content;
 
-    private final String mReviewUrl;
+    @SerializedName("url")
+    private String reviewUrl;
 
-    public Review(String author, String content, String reviewUrl){
-        mAuthor = author;
-        mContent = content;
-        mReviewUrl = reviewUrl;
+
+    public Review(String authorName, String content, String reviewUrl){
+        this.authorName = authorName;
+        this.content = content;
+        this.reviewUrl = reviewUrl;
     }
 
-    public String getAuthor(){
-        return mAuthor;
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName() {
+         this.authorName = authorName;
     }
 
     public String getContent(){
-        return mContent;
+        return content;
+    }
+
+    public void setContent() {
+        this.content = content;
     }
 
     public String getReviewUrl(){
-        return mReviewUrl;
+        return reviewUrl;
+    }
+
+    public void setReviewUrl() {
+        this.reviewUrl = reviewUrl;
     }
 
 }

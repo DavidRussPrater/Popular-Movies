@@ -22,11 +22,4 @@
 
     </string-array>
 
-    <string-array name="spinner_settings">
-        <item>Top Rated</item>
-        <item>Most Popular</item>
-        <item>Favorites</item>
-
-    </string-array>
-
 </resources>

@@ -17,16 +17,11 @@
 
     <!-- Strings for the UriBuilder -->
 
-    <string name="tmdb_base_url" translatable="false">http://api.themoviedb.org/3/movie/</string>
-
 
     <!-- Strings for Miscellaneous -->
-    <string name="release_date_string">Release Date</string>
-    <string name="rating_string">Rating</string>
 
     <!-- Strings for the "Order by" preferences -->
 
-    <string name="settings_menu_item">Settings</string>
     <string name="settings_title">Movies Settings</string>
 
     <string name="settings_order_by_label">Order by</string>
@@ -42,15 +37,11 @@
     <string name="settings_show_favorites_label">Favorites</string>
     <string name="settings_show_favorites_value">Favorites</string>
 
-    <string name="no_internet_connection">No Internet Connection</string>
-    <string name="no_movies">No Movies Found</string>
-
     <string name="videos_label">Videos</string>
     <string name="reviews_label">Reviews</string>
     <string name="read_full_review">Read Full Review</string>
     <string name="reviewer_place_holder">John Smith</string>
     <string name="review_place_holder">With the likes of Anne Hathaway, Jessica Chastain, Michael Caine, Casey Affleck, Ellen Burstyn and John Lithgow as supporting players, it is redundant to say that the ensemble adds so much more to a film that boasts excellence in all departments.</string>
-    <string name="video_place_holder_description">This is where the videos are.</string>
 
     <string name="trailer_place_holder_description">Image preview for video</string>
 

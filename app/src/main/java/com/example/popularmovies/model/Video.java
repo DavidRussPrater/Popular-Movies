@@ -1,20 +1,27 @@
 package com.example.popularmovies.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Video {
 
-    private final String mVideoTitle;
+    @SerializedName("name")
+    private String videoTitle;
 
-    private final String mVideoKey;
+    @SerializedName("key")
+    private String videoUrl;
 
-    public Video(String videoTitle, String videoKey){
-        mVideoTitle = videoTitle;
-        mVideoKey = videoKey;
+
+    public Video(String videoTitle, String videoUrl){
+        this.videoTitle = videoTitle;
+        this.videoUrl = videoUrl;
     }
 
-    public String getVideoTitle(){
-        return mVideoTitle;
+    public String getVideoTitle() {
+        return videoTitle;
     }
-    public String getVideoKey(){
-        return mVideoKey;
+
+    public String getVideoUrl(){
+        return videoUrl;
     }
+
 }

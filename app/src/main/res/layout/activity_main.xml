@@ -5,38 +5,10 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <FrameLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <GridView
-            android:id="@+id/gridview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:verticalSpacing="0dp"
-            android:horizontalSpacing="0dp"
-            android:stretchMode="columnWidth"
-            android:numColumns="3"/>
-
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:textColor="@color/colorText"
-        android:textSize="16sp" />
-
-    <ProgressBar
-        android:id="@+id/loading_indicator"
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_centerInParent="true"
-        android:indeterminate="false"
-        android:indeterminateDrawable="@drawable/progress_indicator"
-        android:max="100"
-        android:progress="40" />
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

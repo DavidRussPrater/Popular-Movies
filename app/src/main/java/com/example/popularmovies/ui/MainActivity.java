@@ -1,234 +1,66 @@
 package com.example.popularmovies.ui;
 
-import android.app.LoaderManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.Loader;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.TextView;
 
 import com.example.popularmovies.BuildConfig;
-import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.utils.MovieLoader;
+import com.example.popularmovies.ApiService;
 import com.example.popularmovies.R;
-import com.example.popularmovies.data.SettingsActivity;
 import com.example.popularmovies.adapter.MovieAdapter;
+import com.example.popularmovies.model.Movie;
+import com.example.popularmovies.model.ApiResponse;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>>, SharedPreferences.OnSharedPreferenceChangeListener {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-    private static final String API_KEY = BuildConfig.API_KEY;
+public class MainActivity extends AppCompatActivity {
+    public static final String BASE_URL = "http://api.themoviedb.org/3/";
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private final static String API_KEY = BuildConfig.API_KEY;
+    private static Retrofit retrofit = null;
+    private RecyclerView recyclerView = null;
 
-    private static final int MOVIE_LOADER_ID = 1;
-
-    // Initialize and empty TextView for when there is no network connection
-    private TextView mEmptyStateTextView;
-
-    // Initialize an movieAdapter
-    private MovieAdapter mAdapter;
-
-    // Initialize a new Date variable to the current date to be used to show movies recently released
-    private final Date mDate = new Date();
-    private final String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(mDate);
-
-    //Format the current date by adding one year to that way the user can view a list up movies to be released
-    private final String yearDate = (currentDate.substring(0,4));
-    private final int yearInt = Integer.parseInt(yearDate) + 1;
-    private final String formattedDateForNewReleases = Integer.toString(yearInt);
-
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        connectAndGetApiData();
+    }
 
-        // Find the {@link GridView} object in the view hierarchy of the {@link Activity}.
-        // There should be a {@link GridView} with the view ID called grid, which is declared in the
-        // activity_main.xml layout file.
-        GridView gridView =  findViewById(R.id.gridview);
-
-        // Link mEmptyStateTextView to the corresponding xml text view
-        mEmptyStateTextView = findViewById(R.id.empty_view);
-        gridView.setEmptyView(mEmptyStateTextView);
-
-        mAdapter = new MovieAdapter(this, new ArrayList<Movie>());
-
-        // Make the {@link GridView} use the {@link MovieAdapter} created above, so that the
-        // {@link GridView} will display list items for each {@link Movie} in the grid
-        gridView.setAdapter(mAdapter);
-
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    // This method create an instance of Retrofit
+    // set the base url
+    public void connectAndGetApiData() {
+        if (retrofit == null) {
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        ApiService apiService = retrofit.create(ApiService.class);
+        Call<ApiResponse<Movie>> call = apiService.getTopRatedMovies(API_KEY);
+        call.enqueue(new Callback<ApiResponse<Movie>>() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // Find the current movie that was clicked
-                Movie currentMovie = mAdapter.getItem(position);
+            public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
+                List<Movie> movies = response.body().getResults();
+                recyclerView.setAdapter(new MovieAdapter(movies, R.layout.item_movie, getApplicationContext()));
+                Log.d(TAG, "Number of movies received: " + movies.size());
+            }
 
-                String movieTitle = Objects.requireNonNull(currentMovie).getMovieTitle();
-                String moviePoster = currentMovie.getPosterImage();
-                String movieReleaseDate = currentMovie.getReleaseDate();
-                String movieVoteAverage = currentMovie.getVoteAverage();
-                String moviePlotSynopsis = currentMovie.getPlotSynopsis();
-                String movieBackdropPath = currentMovie.getBackdropPath();
-
-                String[] movieDetailsArray = {movieTitle, moviePoster, movieReleaseDate, movieVoteAverage, moviePlotSynopsis, movieBackdropPath};
-
-                // Create variable for the
-                Class destinationActivity = DetailActivity.class;
-                Intent intentToStartActivity = new Intent(MainActivity.this, destinationActivity);
-
-                intentToStartActivity.putExtra("details", movieDetailsArray);
-
-                // Send the intent to launch a new activity (The detail activity with the movie information)
-                startActivity(intentToStartActivity);
+            @Override
+            public void onFailure(Call<ApiResponse<Movie>> call, Throwable throwable) {
+                Log.e(TAG, throwable.toString());
             }
         });
-
-        // Check the state of the devices network connectivity
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Get details on the currently active default data network
-        NetworkInfo networkInfo = Objects.requireNonNull(connectivityManager).getActiveNetworkInfo();
-
-        // If there is a network connection, fetch data
-        if (networkInfo != null && networkInfo.isConnected()) {
-
-            // Get a reference to the LoaderManager, in order to interact with loaders.
-            LoaderManager loaderManager = getLoaderManager();
-
-            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-            // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
-
-        } else {
-            // Display error that there is no network connectivity and hide the progress bar
-            View loadingIndicator = findViewById(R.id.loading_indicator);
-            loadingIndicator.setVisibility(View.GONE);
-
-            // Update empty state with no connection error message
-            mEmptyStateTextView.setText(R.string.no_internet_connection);
-        }
-
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-
-
-
-
-    }
-
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int i, Bundle bundle) {
-
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        String orderBy = sharedPrefs.getString(getString(R.string.settings_order_by_key), getString(R.string.settings_order_by_default));
-
-        // parse breaks apart the URI string that's passed into its parameter
-        Uri baseUri = Uri.parse(getString(R.string.tmdb_base_url));
-
-        // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
-        Uri.Builder uriBuilder = baseUri.buildUpon();
-
-        if (orderBy.equals(getString(R.string.settings_order_by_most_popular_value_descending))){
-            uriBuilder.appendPath(orderBy);
-
-        } else if (orderBy.equals(getString(R.string.settings_order_by_top_rated_value_descending))) {
-            uriBuilder.appendPath(orderBy);
-        }
-
-        uriBuilder.appendQueryParameter("region", "US");
-        uriBuilder.appendQueryParameter("with_original_language", "en");
-        uriBuilder.appendQueryParameter("vote_count.gte", "200");
-        uriBuilder.appendQueryParameter("api_key", API_KEY);
-
-        String URIcheck = uriBuilder.toString();
-        Log.i("URI String", URIcheck);
-
-        // Create a new loader for the given URL
-        return new MovieLoader(this, uriBuilder.toString());
-
-    }
-
-
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movies) {
-        // Hide loading indicator because data has been loaded
-        View loadingIndicator = findViewById(R.id.loading_indicator);
-        loadingIndicator.setVisibility(View.GONE);
-
-        // Set empty state to display "No movies found"
-        mEmptyStateTextView.setText(R.string.no_movies);
-
-        // Clear the adapter of previous movie data
-        mAdapter.clear();
-
-        // If there is a valid list of {@link movie}s, then add them to the adapter's
-        // data set. This will trigger the ListView to update.
-        if (movies != null && !movies.isEmpty()) {
-            mAdapter.addAll(movies);
-        }
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-        // Loader reset, so we can clear out our existing data.
-        mAdapter.clear();
-    }
-
-
-    @Override
-    // This method initialize the contents of the Activity's options main.
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the Options Menu specified in XML
-        getMenuInflater().inflate(R.menu.main, menu);
-
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent settingsIntent = new Intent(this, SettingsActivity.class);
-            startActivity(settingsIntent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
-
     }
 }

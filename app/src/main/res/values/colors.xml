@@ -5,10 +5,6 @@
     <color name="colorAccent">#6540ce</color>
     <color name="background">#efefef</color>
     <color name="colorText">#000000</color>
-    <color name="divider">#FFFFFF</color>
     <color name="labelsColorText">#6540ce</color>
-
-    <color name="gold_star">#6540ce</color>
-    <color name="white_star">#FFFFFFFF</color>
 
 </resources>
