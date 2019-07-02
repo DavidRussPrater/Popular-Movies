@@ -1,66 +1,126 @@
 package com.example.popularmovies.ui;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import com.example.popularmovies.BuildConfig;
-import com.example.popularmovies.ApiService;
+import com.example.popularmovies.MainViewModel;
 import com.example.popularmovies.R;
 import com.example.popularmovies.adapter.MovieAdapter;
+import com.example.popularmovies.data.SettingsActivity;
+import com.example.popularmovies.databinding.ActivityMainBinding;
 import com.example.popularmovies.model.Movie;
-import com.example.popularmovies.model.ApiResponse;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-public class MainActivity extends AppCompatActivity {
-    public static final String BASE_URL = "http://api.themoviedb.org/3/";
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private final static String API_KEY = BuildConfig.API_KEY;
-    private static Retrofit retrofit = null;
-    private RecyclerView recyclerView = null;
+    private GridLayoutManager mGridLayoutManager;
+    private ActivityMainBinding mBinding;
+    private MainViewModel mainViewModel;
+    private MovieAdapter mMovieAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        connectAndGetApiData();
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        Context context;
+        mGridLayoutManager = new GridLayoutManager(this, 3);
+        mMovieAdapter = new MovieAdapter(this);
+
+        mBinding.moviesRecyclerView.setLayoutManager(mGridLayoutManager);
+        mBinding.moviesRecyclerView.setAdapter(mMovieAdapter);
+
+
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        populateUI();
+
     }
 
-    // This method create an instance of Retrofit
-    // set the base url
-    public void connectAndGetApiData() {
-        if (retrofit == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
         }
-        ApiService apiService = retrofit.create(ApiService.class);
-        Call<ApiResponse<Movie>> call = apiService.getTopRatedMovies(API_KEY);
-        call.enqueue(new Callback<ApiResponse<Movie>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Movie>> call, Response<ApiResponse<Movie>> response) {
-                List<Movie> movies = response.body().getResults();
-                recyclerView.setAdapter(new MovieAdapter(movies, R.layout.item_movie, getApplicationContext()));
-                Log.d(TAG, "Number of movies received: " + movies.size());
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<Movie>> call, Throwable throwable) {
-                Log.e(TAG, throwable.toString());
-            }
-        });
+        return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        populateUI();
+
+    }
+
+    protected void populateUI() {
+        mainViewModel.getPopularMovies().removeObservers(MainActivity.this);
+        mainViewModel.getTopRatedMovies().removeObservers(MainActivity.this);
+        mainViewModel.getFavoriteMovies().removeObservers(MainActivity.this);
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String orderBy = sharedPrefs.getString(getString(R.string.settings_order_by_key), getString(R.string.settings_order_by_default));
+
+        switch (orderBy) {
+            case "popular":
+                mainViewModel.getPopularMovies().observe(MainActivity.this,
+                        new Observer<List<Movie>>() {
+                            @Override
+                            public void onChanged(@Nullable List<Movie> movies) {
+                                mMovieAdapter.setMoviesList(movies);
+                            }
+                        });
+                break;
+            case "top_rated":
+                mainViewModel.getTopRatedMovies().observe(MainActivity.this,
+                        new Observer<List<Movie>>() {
+                            @Override
+                            public void onChanged(@Nullable List<Movie> movies) {
+                                mMovieAdapter.setMoviesList(movies);
+                            }
+                        });
+                break;
+            default:
+                mainViewModel.getFavoriteMovies().observe(MainActivity.this,
+                        new Observer<List<Movie>>() {
+                            @Override
+                            public void onChanged(@Nullable List<Movie> movies) {
+                                if (mMovieAdapter.getItemCount() < movies.size()) {
+                                    mMovieAdapter.setMoviesList(movies);
+                                } else if (movies.size() == 0) {
+
+                                }
+                            }
+                        });
+        }
+
+    }
+
+
 }

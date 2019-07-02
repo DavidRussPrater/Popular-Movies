@@ -2,6 +2,14 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.example.popularmovies.model.Movie" />
+
+    </data>
+
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
@@ -26,6 +34,7 @@
                 app:expandedTitleMarginStart="16dp"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 app:scrimAnimationDuration="300"
+                app:title="@{viewModel.title}"
                 app:scrimVisibleHeightTrigger="100dp">
 
                 <ImageView
@@ -67,6 +76,7 @@
 
                 <include
                     android:id="@+id/movies_detail"
+                    app:viewModel="@{viewModel}"
                     layout="@layout/detail_movie" />
 
                 <include
@@ -89,6 +99,7 @@
             android:layout_margin="16dp"
             android:clickable="true"
             android:focusable="true"
+            android:src="@drawable/ic_favorite_outline_white_24px"
             app:layout_anchor="@+id/app_bar"
             app:layout_anchorGravity="end|right|bottom"/>
     </android.support.design.widget.CoordinatorLayout>

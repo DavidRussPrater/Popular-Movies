@@ -1,180 +1,149 @@
 package com.example.popularmovies.ui;
 
+import android.content.Context;
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
+import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.example.popularmovies.BuildConfig;
-import com.example.popularmovies.ApiService;
+import com.example.popularmovies.rest.ApiService;
 import com.example.popularmovies.R;
 import com.example.popularmovies.adapter.ReviewAdapter;
 import com.example.popularmovies.adapter.VideoAdapter;
+import com.example.popularmovies.databinding.ActivityDetailBinding;
 import com.example.popularmovies.model.ApiResponse;
 import com.example.popularmovies.model.Review;
 import com.example.popularmovies.model.Video;
+import com.example.popularmovies.rest.ServiceGenerator;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
+import com.example.popularmovies.model.Movie;
 
 public class DetailActivity extends AppCompatActivity {
 
-    public static final String BASE_URL = "http://api.themoviedb.org/3/";
-    private static final String TAG = MainActivity.class.getSimpleName();
-    // insert your themoviedb.org API KEY here
-    private final static String API_KEY = BuildConfig.API_KEY;
-    public static AppBarLayout mAppBarLayout;
-    private static Retrofit retrofit = null;
+    public static final String DETAIL_INTENT_KEY = "com.example.prate.popularmovies.ui.detail";
 
-    private RecyclerView reviewRecyclerView = null;
-    private RecyclerView videoRecyclerView = null;
+    private VideoAdapter mVideoAdapter;
+    private ReviewAdapter mReviewAdapter;
+    private ApiService mApiService;
+    private ActivityDetailBinding mBinding;
+    private Movie movie;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
 
-        // Find the image and text views in the detail_activity and set them to their corresponding
-        // variables
+        mApiService = ServiceGenerator.createService(ApiService.class);
 
+        Intent intent = getIntent();
+        movie = intent.getParcelableExtra(DETAIL_INTENT_KEY);
+        mBinding.setViewModel(movie);
 
-        reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
-        reviewRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        setSupportActionBar(mBinding.toolbar);
 
-        videoRecyclerView = (RecyclerView) findViewById(R.id.video_recycler_view);
-        videoRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
-
-
-        ImageView moviePosterImageView = findViewById(R.id.movie_poster);
-        TextView movieTitleTextView = findViewById(R.id.movie_title);
-        TextView movieReleaseDateTextView = findViewById(R.id.release_date);
-        TextView movieVoteAverageTextView = findViewById(R.id.vote_average);
-        TextView moviePlotSynopsisTextView = findViewById(R.id.plot_synopsis);
-
-        // Pass in the array of strings using the intent from tha MainActivity and set its values to
-        // the corresponding text and image view variables
-        Bundle extras = getIntent().getExtras();
-
-        String[] detailsArray = Objects.requireNonNull(extras).getStringArray("details");
-
-        if (detailsArray != null) {
-            movieTitleTextView.setText(detailsArray[1]);
-        }
-
-        mAppBarLayout = findViewById(R.id.app_bar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(detailsArray[1]);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        ImageView toolbarImage = findViewById(R.id.backdrop);
+        populateUI();
+        populateReviews();
+        populateVideos();
 
+    }
 
-        // This if statement checks if there is a poster image for the current movie. If the
-        // response returns null set it to the posterimageplaceholder.png else set it to the
-        // correct image provided.
+    protected void populateUI(){
 
-        String picassoPosterImage = Objects.requireNonNull(detailsArray)[0];
-        Picasso.get().load(picassoPosterImage)
-                .error(R.drawable.posterimageplaceholder)
-                .into(moviePosterImageView);
-
-        moviePlotSynopsisTextView.setText(detailsArray[2]);
-        movieReleaseDateTextView.setText(detailsArray[3]);
-
-        String picassoBackdropImage = "http://image.tmdb.org/t/p/w1280/" + Objects.requireNonNull(detailsArray)[4];
+        String picassoBackdropImage = "http://image.tmdb.org/t/p/w1280/" + movie.getBackdropPath();
         Picasso.get().load(picassoBackdropImage)
                 .error(R.drawable.posterimageplaceholder)
-                .into(toolbarImage);
+                .into(mBinding.backdrop);
 
-        movieVoteAverageTextView.setText(detailsArray[5]);
-
-
-        final FloatingActionButton fab = findViewById(R.id.favorite_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, R.string.added_favorite, Snackbar.LENGTH_LONG)
-                        .setAction("UNDO", new UndoFavoritesFabAdd()).show();
-                fab.setImageResource(R.drawable.ic_favorite_solid_white_24px);
-            }
-        });
-
-        connectAndGetReviewData();
-        connectAndGetVideoData();
+        Picasso.get().load("http://image.tmdb.org/t/p/w342" + movie.getPosterPath())
+                .error(R.drawable.posterimageplaceholder)
+                .into(mBinding.moviesDetail.moviePoster);
 
     }
 
-    // This method create an instance of Retrofit set the base url
-    public void connectAndGetReviewData() {
-        if (retrofit == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
 
-        ApiService apiService = retrofit.create(ApiService.class);
-        Call<ApiResponse<Review>> call = apiService.getReviews("157336", API_KEY);
+    private void populateReviews() {
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+
+        mBinding.reviewDetails.reviewRecyclerView.setLayoutManager(layoutManager);
+        mBinding.reviewDetails.reviewRecyclerView.setHasFixedSize(true);
+        mBinding.reviewDetails.reviewRecyclerView.setNestedScrollingEnabled(true);
+
+        mReviewAdapter = new ReviewAdapter(this);
+        mBinding.reviewDetails.reviewRecyclerView.setAdapter(mReviewAdapter);
+
+        Call<ApiResponse<Review>> call = mApiService.getReviews(movie.getMovieId());
+
         call.enqueue(new Callback<ApiResponse<Review>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Review>> call, Response<ApiResponse<Review>> response) {
-                List<Review> reviews = response.body().getResults();
-                reviewRecyclerView.setAdapter(new ReviewAdapter(reviews, R.layout.item_review, getApplicationContext()));
-                Log.d(TAG, "Number of reviews received: " + reviews.size());
+            public void onResponse(Call<ApiResponse<Review>> call,
+                                   Response<ApiResponse<Review>> response) {
+                List<Review> results = response.body().results;
+                if (!results.isEmpty() && results != null) {
+                    mReviewAdapter.setReviews(results);
+                }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Review>> call, Throwable throwable) {
-                Log.e(TAG, throwable.toString());
+            public void onFailure(Call<ApiResponse<Review>> call, Throwable t) {
+                mReviewAdapter = null;
             }
         });
+
     }
 
+    private void populateVideos(){
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 
-    // This method create an instance of Retrofit set the base url
-    public void connectAndGetVideoData() {
-        if (retrofit == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
+        mBinding.videoDetail.videoRecyclerView.setLayoutManager(layoutManager);
+        mBinding.videoDetail.videoRecyclerView.setHasFixedSize(true);
+        mBinding.videoDetail.videoRecyclerView.setNestedScrollingEnabled(true);
 
-        ApiService apiService = retrofit.create(ApiService.class);
-        Call<ApiResponse<Video>> call = apiService.getVideos("157336", API_KEY);
+        mVideoAdapter = new VideoAdapter(this);
+        mBinding.videoDetail.videoRecyclerView.setAdapter(mVideoAdapter);
+
+        Call<ApiResponse<Video>> call = mApiService.getVideos(movie.getMovieId());
+
         call.enqueue(new Callback<ApiResponse<Video>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Video>> call, Response<ApiResponse<Video>> response) {
-                List<Video> videos = response.body().getResults();
-                videoRecyclerView.setAdapter(new VideoAdapter(videos, R.layout.item_video, getApplicationContext()));
-                Log.d(TAG, "Number of videos received: " + videos.size());
+            public void onResponse(Call<ApiResponse<Video>> call,
+                                   Response<ApiResponse<Video>> response) {
+                List<Video> results = response.body().results;
+                if (!results.isEmpty() && results != null) {
+                    mVideoAdapter.setVideos(results);
+                }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Video>> call, Throwable throwable) {
-                Log.e(TAG, throwable.toString());
+            public void onFailure(Call<ApiResponse<Video>> call, Throwable t) {
+                mVideoAdapter = null;
             }
         });
+
     }
 
 
@@ -189,5 +158,7 @@ public class DetailActivity extends AppCompatActivity {
             fab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
         }
     }
+
+
 
 }

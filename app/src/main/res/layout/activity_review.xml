@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.example.popularmovies.model.Review" />
+
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.popularmovies.ui.ReviewActivity">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/reviewer_name_label"
+                style="@style/detail_movie_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reviewer_label"
+                tools:text="@string/reviewer_label" />
+
+            <TextView
+                android:id="@+id/reviewer_name"
+                style="@style/detail_movie_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.authorName}"/>
+
+            <TextView
+                android:id="@+id/review_label"
+                style="@style/detail_movie_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/review_label"
+                tools:text="Review" />
+
+            <TextView
+                android:id="@+id/review_content"
+                style="@style/detail_movie_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.content}"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>
