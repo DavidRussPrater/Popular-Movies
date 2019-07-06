@@ -56,6 +56,13 @@ public class SettingsActivity extends AppCompatActivity {
             String preferenceString = preferences.getString(preference.getKey(), "");
             onPreferenceChange(preference, preferenceString);
         }
+
+
+    }
+
+    public static int getChangedMovie(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(context.getString(R.string.pref_changed_movie), -1);
     }
 
     public static void setChangedMovie(Context context, int movieNumber) {
@@ -64,4 +71,10 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putInt(context.getString(R.string.pref_changed_movie), movieNumber);
         editor.apply();
     }
+
+    public static int getSorting(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(context.getString(R.string.settings_order_by_key), 0);
+    }
+
 }

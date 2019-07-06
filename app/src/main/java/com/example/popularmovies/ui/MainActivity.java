@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private MainViewModel mainViewModel;
     private MovieAdapter mMovieAdapter;
 
+    public static final int FAVORITES = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +76,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
         populateUI();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMovieAdapter.refreshFavorite();
     }
 
     protected void populateUI() {

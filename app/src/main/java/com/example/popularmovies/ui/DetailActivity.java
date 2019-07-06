@@ -92,6 +92,7 @@ public class DetailActivity extends AppCompatActivity {
                     isFavorite = false;
                     mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
                     snackBarText = getString(R.string.removed_from_favorites);
+                    Snackbar.make(mBinding.coordinatorLayout, snackBarText, Snackbar.LENGTH_SHORT).show();
                 } else {
                     executor.execute(new Runnable() {
                         @Override
@@ -102,8 +103,10 @@ public class DetailActivity extends AppCompatActivity {
                     isFavorite = true;
                     mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_solid_white_24px);
                     snackBarText = getString(R.string.added_favorite);
+                    Snackbar.make(mBinding.coordinatorLayout, snackBarText, Snackbar.LENGTH_SHORT)
+                            .setAction("Undo", new UndoFavoritesFabAdd()).show();
                 }
-                Snackbar.make(mBinding.coordinatorLayout, snackBarText, Snackbar.LENGTH_SHORT).show();
+
 
 
             }
@@ -210,10 +213,20 @@ public class DetailActivity extends AppCompatActivity {
 
             Snackbar.make(view, R.string.removed_from_favorites, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDatabase.movieDao().delete(movie);
+                }
+            });
             fab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
 
 }

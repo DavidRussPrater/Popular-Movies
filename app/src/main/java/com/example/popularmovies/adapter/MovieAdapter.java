@@ -3,18 +3,18 @@ package com.example.popularmovies.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.popularmovies.FavoriteExecutor;
 import com.example.popularmovies.R;
 import com.example.popularmovies.data.FavoriteDatabase;
+import com.example.popularmovies.data.SettingsActivity;
 import com.example.popularmovies.databinding.ItemMovieBinding;
 
 import com.example.popularmovies.model.MiniMovie;
@@ -30,7 +30,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private Activity mActivity;
     private List<Movie> movies;
     private FavoriteDatabase mDatabase;
-    private View mView;
     private Executor executor;
 
 
@@ -57,6 +56,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Context context = v.getContext();
                 Intent intent = new Intent(context, DetailActivity.class);
                 intent.putExtra(DetailActivity.DETAIL_INTENT_KEY, movie);
@@ -91,8 +91,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         notifyDataSetChanged();
     }
 
-    //A view holder inner class where we get reference to the views in the layout using their ID
-    class MovieViewHolder extends RecyclerView.ViewHolder {
+    public void refreshFavorite() {
+        int movieNumber = SettingsActivity.getChangedMovie(mActivity);
+        if (movieNumber != -1) {
+            notifyItemChanged(movieNumber);
+            SettingsActivity.setChangedMovie(mActivity, -1);
+        }
+    }
+
+    public class MovieViewHolder extends RecyclerView.ViewHolder {
         ItemMovieBinding movieBinding;
         boolean isFavorite;
 
@@ -104,6 +111,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         void bind(final Movie movie) {
             movieBinding.setViewModel(movie);
+            movieBinding.setPresenter(this);
 
             Picasso.get()
                     .load("http://image.tmdb.org/t/p/w342" + movie.getPosterPath())
@@ -127,7 +135,42 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             });
         }
 
+        public void onClickFavorite(View view) {
+            String snackBarText;
+            int position = getAdapterPosition();
+            final Movie movie = movies.get(position);
+
+            if (isFavorite) {
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDatabase.movieDao().delete(movie);
+                    }
+                });
+                movies.remove(position);
+                notifyItemRemoved(position);
+                isFavorite = false;
+                movieBinding.favoriteImageView.setImageResource(R.drawable.ic_favorite_outline_white_24px);
+                snackBarText = mActivity.getString(R.string.removed_from_favorites);
+                Snackbar.make(view, snackBarText, Snackbar.LENGTH_SHORT).show();
+
+
+            } else {
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDatabase.movieDao().insert(movie);
+                    }
+                });
+                isFavorite = true;
+                movieBinding.favoriteImageView.setImageResource(R.drawable.ic_favorite_solid_white_24px);
+                snackBarText = mActivity.getString(R.string.added_favorite);
+                Snackbar.make(view, snackBarText, Snackbar.LENGTH_SHORT).show();
+            }
+
         }
+
+    }
 
  }
 
