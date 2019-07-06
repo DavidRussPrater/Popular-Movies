@@ -38,6 +38,8 @@
     <string name="settings_show_favorites_label">Favorites</string>
     <string name="settings_show_favorites_value">favorites</string>
 
+    <string name="pref_changed_movie" translatable="false">changed_movie</string>
+
     <string name="videos_label">Videos</string>
     <string name="reviews_label">Reviews</string>
     <string name="read_full_review">Read Full Review</string>

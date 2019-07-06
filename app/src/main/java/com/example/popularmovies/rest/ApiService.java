@@ -17,10 +17,10 @@ public interface ApiService {
     @GET("movie/popular")
     Call<ApiResponse<Movie>> getPopularMovies();
 
-    @GET("movie/{id}/reviews")
-    Call<ApiResponse<Review>> getReviews(@Path("id") String id);
+    @GET("movie/{movieId}/reviews")
+    Call<ApiResponse<Review>> getReviews(@Path("movieId") String id);
 
-    @GET("movie/{id}/videos")
-    Call<ApiResponse<Video>> getVideos(@Path("id") String id);
+    @GET("movie/{movieId}/videos")
+    Call<ApiResponse<Video>> getVideos(@Path("movieId") String id);
 
 }

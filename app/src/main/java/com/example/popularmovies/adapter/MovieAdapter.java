@@ -3,34 +3,41 @@ package com.example.popularmovies.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.view.ViewCompat;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
+import com.example.popularmovies.FavoriteExecutor;
 import com.example.popularmovies.R;
+import com.example.popularmovies.data.FavoriteDatabase;
 import com.example.popularmovies.databinding.ItemMovieBinding;
 
+import com.example.popularmovies.model.MiniMovie;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.ui.DetailActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
     private Activity mActivity;
     private List<Movie> movies;
+    private FavoriteDatabase mDatabase;
     private View mView;
+    private Executor executor;
 
 
     public MovieAdapter(Activity activity) {
         this.mActivity = activity;
+        this.mDatabase = FavoriteDatabase.getDatabase(activity);
+        this.executor = new FavoriteExecutor();
     }
 
     @Override
@@ -45,6 +52,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(@NonNull MovieViewHolder holder, final int position) {
         final Movie movie = movies.get(position);
         holder.bind(movie);
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,9 +92,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     //A view holder inner class where we get reference to the views in the layout using their ID
-    class MovieViewHolder extends RecyclerView.ViewHolder{
+    class MovieViewHolder extends RecyclerView.ViewHolder {
         ItemMovieBinding movieBinding;
-
+        boolean isFavorite;
 
 
         MovieViewHolder(ItemMovieBinding movieBinding) {
@@ -94,7 +102,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             this.movieBinding = movieBinding;
         }
 
-        void bind(final Movie movie){
+        void bind(final Movie movie) {
             movieBinding.setViewModel(movie);
 
             Picasso.get()
@@ -103,10 +111,25 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                     .error(R.drawable.trailer_place_holder)
                     .into(movieBinding.moviePoster);
 
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    MiniMovie miniMovie = mDatabase.movieDao().getMovieById(movie.getMovieId());
+
+                    if (miniMovie != null) {
+                        isFavorite = true;
+                        movieBinding.favoriteImageView.setImageResource(R.drawable.ic_favorite_solid_white_24px);
+                    } else {
+                        isFavorite = false;
+                        movieBinding.favoriteImageView.setImageResource(R.drawable.ic_favorite_outline_white_24px);
+                    }
+                }
+            });
         }
 
-    }
+        }
 
-}
+ }
+
 
 

@@ -15,16 +15,15 @@ import java.util.List;
 @Dao
 public interface MovieDao {
 
-    @Query("SELECT * FROM movie")
+    @Query("SELECT * FROM favorites")
     LiveData<List<Movie>> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertMovie(Movie movie);
+    void insert(Movie movie);
+
+    @Query("SELECT movieId FROM favorites WHERE movieId = :id")
+    MiniMovie getMovieById(String id);
 
     @Delete
     void delete(Movie movie);
-
-    @Query("SELECT * FROM movie where movieId = :id")
-    MiniMovie getMovieById(String id);
-
 }

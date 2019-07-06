@@ -1,6 +1,7 @@
 package com.example.popularmovies.data;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -55,5 +56,12 @@ public class SettingsActivity extends AppCompatActivity {
             String preferenceString = preferences.getString(preference.getKey(), "");
             onPreferenceChange(preference, preferenceString);
         }
+    }
+
+    public static void setChangedMovie(Context context, int movieNumber) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt(context.getString(R.string.pref_changed_movie), movieNumber);
+        editor.apply();
     }
 }

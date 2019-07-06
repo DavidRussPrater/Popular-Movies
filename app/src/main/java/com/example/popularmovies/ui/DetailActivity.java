@@ -1,22 +1,17 @@
 package com.example.popularmovies.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 
+import com.example.popularmovies.FavoriteExecutor;
+import com.example.popularmovies.data.FavoriteDatabase;
+import com.example.popularmovies.model.MiniMovie;
 import com.example.popularmovies.rest.ApiService;
 import com.example.popularmovies.R;
 import com.example.popularmovies.adapter.ReviewAdapter;
@@ -29,6 +24,7 @@ import com.example.popularmovies.rest.ServiceGenerator;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,9 +35,15 @@ import com.example.popularmovies.model.Movie;
 public class DetailActivity extends AppCompatActivity {
 
     public static final String DETAIL_INTENT_KEY = "com.example.prate.popularmovies.ui.detail";
+    public static final String MOVIE_NUMBER_KEY = "com.example.prate.popularmovies.ui.movie_number";
+
+    private int movieNumber;
 
     private VideoAdapter mVideoAdapter;
     private ReviewAdapter mReviewAdapter;
+    private FavoriteDatabase mDatabase;
+    private boolean isFavorite;
+    private Executor executor;
     private ApiService mApiService;
     private ActivityDetailBinding mBinding;
     private Movie movie;
@@ -53,10 +55,13 @@ public class DetailActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
 
         mApiService = ServiceGenerator.createService(ApiService.class);
+        executor = new FavoriteExecutor();
 
         Intent intent = getIntent();
         movie = intent.getParcelableExtra(DETAIL_INTENT_KEY);
         mBinding.setViewModel(movie);
+
+        mDatabase = FavoriteDatabase.getDatabase(getApplicationContext());
 
         setSupportActionBar(mBinding.toolbar);
 
@@ -67,6 +72,42 @@ public class DetailActivity extends AppCompatActivity {
         populateUI();
         populateReviews();
         populateVideos();
+
+
+        FloatingActionButton favoritesFab = findViewById(R.id.favorite_fab);
+
+        favoritesFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Create a new intent to start an AddTaskActivity
+                String snackBarText;
+
+                if (isFavorite) {
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDatabase.movieDao().delete(movie);
+                        }
+                    });
+                    isFavorite = false;
+                    mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
+                    snackBarText = getString(R.string.removed_from_favorites);
+                } else {
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            mDatabase.movieDao().insert(movie);
+                        }
+                    });
+                    isFavorite = true;
+                    mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_solid_white_24px);
+                    snackBarText = getString(R.string.added_favorite);
+                }
+                Snackbar.make(mBinding.coordinatorLayout, snackBarText, Snackbar.LENGTH_SHORT).show();
+
+
+            }
+        });
 
     }
 
@@ -81,6 +122,20 @@ public class DetailActivity extends AppCompatActivity {
                 .error(R.drawable.posterimageplaceholder)
                 .into(mBinding.moviesDetail.moviePoster);
 
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                MiniMovie miniMovie = mDatabase.movieDao().getMovieById(movie.getMovieId());
+
+                if (miniMovie != null) {
+                    isFavorite = true;
+                    mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_solid_white_24px);
+                } else {
+                    isFavorite = false;
+                    mBinding.favoriteFab.setImageResource(R.drawable.ic_favorite_outline_white_24px);
+                }
+            }
+        });
     }
 
 

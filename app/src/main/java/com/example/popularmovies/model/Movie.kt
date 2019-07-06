@@ -7,7 +7,7 @@ import android.support.annotation.NonNull
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
-@Entity
+@Entity (tableName = "favorites")
 @Parcelize
 data class Movie(@PrimaryKey @NonNull @SerializedName ("id") val movieId: String,
                  @SerializedName("poster_path") val posterPath: String?,

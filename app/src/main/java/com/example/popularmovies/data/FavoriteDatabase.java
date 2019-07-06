@@ -7,12 +7,12 @@ import android.content.Context;
 
 import com.example.popularmovies.model.Movie;
 
-@Database(entities = {Movie.class}, version = 1, exportSchema = false)
+@Database(entities = {Movie.class}, version = 2, exportSchema = false)
 public abstract class FavoriteDatabase extends RoomDatabase {
 
 
     private static FavoriteDatabase INSTANCE;
-    private static final String DATABASE_NAME = "Favorites";
+    private static final String DATABASE_NAME = "favorites";
 
     public static FavoriteDatabase getDatabase(Context context) {
         if (INSTANCE == null) {

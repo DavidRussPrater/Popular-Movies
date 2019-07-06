@@ -52,7 +52,7 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<Movie>> getFavoriteMovies() {
         if (favoriteMovies == null) {
             favoriteMovies = new MutableLiveData<>();
-
+            getFavoritesFromDatabase();
         }
         return favoriteMovies;
     }
@@ -76,7 +76,7 @@ public class MainViewModel extends AndroidViewModel {
 
                 @Override
                 public void onFailure(Call<ApiResponse<Movie>> call, Throwable t) {
-                    popularMovies = null;;
+                    popularMovies = null;
                 }
             });
         } else if (sorting == 1) {
@@ -103,6 +103,10 @@ public class MainViewModel extends AndroidViewModel {
 
         }
 
+    }
+
+    private void getFavoritesFromDatabase() {
+        favoriteMovies = favoriteDatabase.movieDao().getAll();
     }
 
 }
